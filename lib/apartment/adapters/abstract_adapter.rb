@@ -1,3 +1,5 @@
+require 'apartment/migrator'
+
 module Apartment
   module Adapters
     class AbstractAdapter
@@ -21,8 +23,10 @@ module Apartment
         run_callbacks :create do
           create_tenant(tenant)
 
+          Migrator.migrate(tenant) if Apartment.full_migration_on_create
+
           switch(tenant) do
-            import_database_schema
+            import_database_schema unless Apartment.full_migration_on_create
 
             # Seed data if appropriate
             seed_data if Apartment.seed_after_create
