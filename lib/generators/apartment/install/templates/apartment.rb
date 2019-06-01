@@ -95,6 +95,11 @@ Apartment.configure do |config|
   # the new tenant
   #
   # config.pg_excluded_names = ["uuid_generate_v4"]
+
+  # Perform full migration on tenants using Apartment::Migrator when creating new tenants
+  # used to manage excluded tables from tenant databases coupled with an ActiveRecord migration concern.
+  # For PostgreSQL, only works with separate databases.
+  # config.full_migration_on_create = false
 end
 
 # Setup a custom Tenant switching middleware. The Proc should return the name of the Tenant that
