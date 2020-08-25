@@ -30,10 +30,23 @@ apartment_namespace = namespace :apartment do
   desc "Migrate all tenants"
   task :migrate do
     warn_if_tenants_empty
+    first = true
     each_tenant do |tenant|
       begin
         puts("Migrating #{tenant} tenant")
+        puts("File.path")
         Apartment::Migrator.migrate tenant
+
+        if first
+          # dump tenant schema
+          first = false
+          File.rename(File.join(Rails.root, 'db', 'schema.rb'), File.join(Rails.root, 'db', 'schema.rb.backup'))
+          Apartment::Tenant.switch(tenant) do
+            Rake::Task["db:schema:dump"].invoke
+          end
+          File.rename(File.join(Rails.root, 'db', 'schema.rb'), File.join(Rails.root, 'db', 'schema_tenant.rb'))
+          File.rename(File.join(Rails.root, 'db', 'schema.rb.backup'), File.join(Rails.root, 'db', 'schema.rb'))
+        end
       rescue Apartment::TenantNotFound => e
         puts e.message
       end
